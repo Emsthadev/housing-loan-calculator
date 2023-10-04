@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+
+* {
+	margin: 0;
+	padding: 0;
+    box-sizing: border-box;
+    border: crimson;
+   
+    font-family: 'Anton', sans-serif;
+}
+body{
+    background: #457fca;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #5691c8, #457fca);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #5691c8, #457fca); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    
+
+}
+.calculate_affordability{
+    background: #757F9A;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #D7DDE8, #757F9A);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #D7DDE8, #757F9A); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    
+width:200px;
+}
+
+.hide {
+    display: none !important;
+  }
+
+  #affordability_calculator_form {
+    max-width: 804px;
+    border: 2px solid #000; /* Adjust the border color and thickness as needed */
+    border-radius: 10px; /* Adjust the border radius as needed for rounded corners */
+    padding: 20px; /* Optional: Add padding inside the element */
+
+    background: rgba( 255, 255, 255, 0.25 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 4px );
+    -webkit-backdrop-filter: blur( 4px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+
+  }
+
+select input {
+    width: 336px;
+}
