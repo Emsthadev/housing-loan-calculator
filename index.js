@@ -1,375 +1,245 @@
 document.addEventListener('DOMContentLoaded', function() {
-	let affordabilityComputeMode = document.getElementById('affordability_compute_mode');
-	let affordabilityPricePeriod = document.getElementById('affordability_price_period');
-	let affordabilityRepPeriod = document.getElementById('affordability_rep_period');
-	let userInput = document.getElementById('user_input');
-	let resultLabel = document.querySelector('.result_label');
-	let result = document.querySelector('.result');
-	let principalAndInterest = document.querySelector('.principal_and_interest');
-	let insurance = document.querySelector('.insurance');
-	let monthlyAmortization = document.querySelector('.monthly_amortization');
-	let hiddenDivComputation = document.querySelector('.hidden_div_computation');
-	let propVal = document.querySelector('.prop_val');
-	let propVal2 = document.querySelector('.prop_val_2');
+  const affordabilityComputeMode = document.getElementById('affordability_compute_mode');
+  const affordabilityPricePeriod = document.getElementById('affordability_price_period');
+  const affordabilityRepPeriod = document.getElementById('affordability_rep_period');
+  let userInput = document.getElementById('user_input');
+  const resultLabel = document.querySelector('.result_label');
+  const result = document.querySelector('.result');
+  const principalAndInterest = document.querySelector('.principal_and_interest');
+  const insurance = document.querySelector('.insurance');
+  const monthlyAmortization = document.querySelector('.monthly_amortization');
+  const hiddenDivComputation = document.querySelector('.hidden_div_computation');
+  const propVal = document.querySelector('.prop_val');
+  const propVal2 = document.querySelector('.prop_val_2');
+  const calculateAffordabilityBtn = document.querySelector('.calculate_affordability');
+  const estEquity = document.querySelector('.est_equity');
+  const gmi = document.querySelector('.gmi');
 
-	let calculateAffordabilityBtn = document.querySelector('.calculate_affordability');
-	let estEquity = document.querySelector('.est_equity');
-	let gmi = document.querySelector('.gmi');
+  function updateLabels(newLabel, newTextResult) {
+    resultLabel.closest('.form-group').querySelector('.result_label').textContent = newTextResult;
+    userInput.closest('.form-group').querySelector('label[for="inp"]').textContent = newLabel;
+  }
 
-        // Function to clear result fields
-        function clearResults() {
-            result.textContent = '';
-            principalAndInterest.textContent = '';
-            insurance.textContent = '';
-            monthlyAmortization.textContent = '';
-            estEquity.textContent = '';
-            gmi.textContent = '';
-        }
-    
-        // Event listener for the 'compute mode' dropdown
-        affordabilityComputeMode.addEventListener('change', function() {
-            clearResults(); // Clear results when the compute mode changes
-    
-            // Rest of your code...
-        });
-    
-        // Event listener for the 'Calculate' button
-    
-    
-        // Event listener for changes in .result element
-        result.addEventListener('keyup', function() {
-            clearResults(); // Clear results when .result element changes
-            console.log(("clearRes",clearResults()));
-            // Rest of your code...
-        });
+  function showAlert(message) {
+    alert(message);
+  }
 
-	// Event listener for the 'compute mode' dropdown
-	affordabilityComputeMode.addEventListener('change', function() {
-		let val = this.value;
-		let newLabel = '';
-		let newTextResult = '';
+  function calculateMonthlyAmortization(loanDesired, interestRate, loanTermMonths) {
+    const monthlyPayment = loanDesired * interestRate / (1 - Math.pow(1 + interestRate, -loanTermMonths));
+    const insuranceValue = loanDesired * 0.0002250427;
+    return monthlyPayment + insuranceValue;
+  }
 
-		switch (val) {
-			case '1':
-				newLabel = 'Desired Loan Amount:';
-				newTextResult = 'The income required for your desired loan amount is approximately:';
-				break;
-			case '2':
-				newLabel = 'Gross Monthly Income:';
-				newTextResult = 'Based on your Gross Monthly Income, you can approximately loan:';
-				break;
-			case '3':
-				newLabel = 'Estimated Value of Property:';
-				newTextResult = 'Based on the appraised value of the property, you can approximately loan:';
-				break;
-			default:
-				newLabel = 'Enter Amount:';
-				break;
-		}
-
-		resultLabel.closest('.form-group').querySelector('.result_label').textContent = newTextResult;
-		userInput.closest('.form-group').querySelector('label[for="inp"]').textContent = newLabel;
-	});
-
-	// Event listener for the 'Calculate' button
-	calculateAffordabilityBtn.addEventListener('click', function() {
-        clearResults();
-		let valMode = affordabilityComputeMode.value;
-		let pricePeriod = parseFloat(affordabilityPricePeriod.value);
-		let loanTermYears = parseInt(affordabilityRepPeriod.value);
-		let loanDesired = parseFloat(userInput.value);
-
-		hiddenDivComputation.classList.remove('hide');
-		// Validations
-		if (userInput.value === '') {
-			alert('Please enter an amount.');
-			return;
-		}
-
-		//  is less than 5000
-		if (parseFloat(userInput.value) < 5000) {
-			alert('Minimum amount must be 5000.');
-			return;
-		}
-
-		//  is greater than 6,000,000
-		if (parseFloat(userInput.value) > 6000000) {
-			alert('Please enter an amount lower than 6,000,000.');
-			return;
-		}
-
-		// affordability_compute_mode is empty
-		if (affordabilityComputeMode.value.trim() === '') {
-			alert('Please select what you want to compute.');
-			return;
-		}
-
-		// affordability_rep_period is empty
-		if (affordabilityRepPeriod.value.trim() === '') {
-			alert('Please select preferred pricing period.');
-			return;
-		}
-
-		if (valMode === '1') {
-			console.log(pricePeriod);
-			let interestRate = (pricePeriod / 100) / 12;
-			let loanTermMonths = 12 * loanTermYears;
-			//condition for 1 year 5.75% pricing period
-			let debtToIncomeRatio = (pricePeriod === 5.75) ? 0.30 : 0.35;
-			let monthlyPayment = loanDesired * interestRate / (1 - Math.pow(1 + interestRate, -loanTermMonths));
-			let requiredIncome = loanDesired / ((((1 + interestRate) ** loanTermMonths) - 1) / (interestRate * (1 + interestRate) ** loanTermMonths)) / debtToIncomeRatio;
-			let principalAndInterestValue = requiredIncome * debtToIncomeRatio;
-			let insuranceValue = loanDesired * 0.0002250427;
-			let monthlyAmortizationValue = monthlyPayment + insuranceValue;
+  function calculateAffordability(annualInterestRate, loanTermYears) {
+    const pricePeriod = parseFloat(affordabilityPricePeriod.value);
+    let monthlyInterestRate = (annualInterestRate / 100) / 12;
+    let loanTermMonths = loanTermYears * 12;
+    let monthlyPaymentPercentage =(pricePeriod === 5.75) ? 30 : 35; // 35%
 
 
 
-			result.textContent = Math.round(requiredIncome.toFixed(2)).toLocaleString('en-US', {
-				style: 'currency',
-				currency: 'PHP',
-				currencyDisplay: 'symbol'
-			});
+    let lowerBound = 0;
+    let upperBound = 100000000; // Set a large upper bound
+    let presentValue = 0;
 
-			principalAndInterest.textContent = principalAndInterestValue.toFixed(2).toLocaleString('en-US', {
-				style: 'currency',
-				currency: 'PHP',
-				currencyDisplay: 'symbol'
-			});
+    // Use a binary search-like loop to find the presentValue
+    while (upperBound - lowerBound > 1) {
+      presentValue = (lowerBound + upperBound) / 2;
 
-			insurance.textContent = insuranceValue.toFixed(2).toLocaleString('en-US', {
-				style: 'currency',
-				currency: 'PHP',
-				currencyDisplay: 'symbol'
-			});
+      const computedValue = presentValue * (monthlyPaymentPercentage / 100) * ((1 - Math.pow(1 + monthlyInterestRate, -loanTermMonths)) / monthlyInterestRate);
+      if (computedValue > 6000000) {
+        upperBound = presentValue;
+      } else {
+        lowerBound = presentValue;
+      }
+    }
+    const computedValue = presentValue * (monthlyPaymentPercentage / 100) * ((1 - Math.pow(1 + monthlyInterestRate, -loanTermMonths)) / monthlyInterestRate);
+      console.log('newPresnetVal',presentValue);
+      console.log('ComputedVal',computedValue);
+    // const insuranceValue = (presentValue / 1000) * 0.2250427;
+    // const monthlyAmortizationValue = (presentValue * (monthlyPaymentPercentage / 100)) + insuranceValue;
 
-			monthlyAmortization.textContent = monthlyAmortizationValue.toFixed(2).toLocaleString('en-US', {
-				style: 'currency',
-				currency: 'PHP',
-				currencyDisplay: 'symbol'
-			});
+    // console.log('insuVal ',insuranceValue,monthlyAmortizationValue)
+    let fixedPresentValue = presentValue * (monthlyPaymentPercentage / 100) * ((1 - Math.pow(1 + monthlyInterestRate, -loanTermMonths)) / monthlyInterestRate);
+    fixedPresentValue = Math.min(fixedPresentValue, 6000000);
+    // fixedPresentValue: 6000006.263413198
+    let principalAndInterest = (presentValue * (monthlyPaymentPercentage / 100))
+     let insuranceValue = (presentValue / 1000) * 0.2250427;
+    let monthlyAmortization = principalAndInterest + insuranceValue;
+    // Return the computed values
+    return {
+      presentValue,
+      monthlyAmortization,
+      insuranceValue,
+      fixedPresentValue
+    };
+  }
 
-			hiddenDivComputation.classList.remove('hide');
-			propVal.classList.add('hide');
-			propVal2.classList.add('hide');
-		}  if (valMode === '2') {
-			// Handle valMode 2 calculations
-			let annualInterestRate = parseFloat(affordabilityPricePeriod.value);
-			let monthlyInterestRate = (annualInterestRate / 100) / 12;
-			let loanTermMonths = loanTermYears * 12;
-			let monthlyPaymentPercentage = (pricePeriod === 5.75) ? 30 : 35; // 35%
+  function displayValues(fixedPresentValue, principalAndInterestValue, insuranceValue, monthlyAmortizationValue) {
+    result.textContent = formatCurrency(fixedPresentValue);
+    principalAndInterest.textContent = formatCurrency(principalAndInterestValue);
+    insurance.textContent = formatCurrency(insuranceValue);
+    monthlyAmortization.textContent = formatCurrency(monthlyAmortizationValue);
+    console.log("from dispV fixedPresentValue",fixedPresentValue);
+    console.log("from dispV principalAndInterestValue", principalAndInterestValue);
+    console.log("from dispV insuranceValue",insuranceValue);
+    console.log("from dispV monthlyAmortizationValue",monthlyAmortizationValue);
 
-			if (userInput.value >= 105552 && pricePeriod != 5.75) {
-				// If userInput exceeds the maximum limit, set it to the maximum value
-				let fixedPresentValue = 105552 * (monthlyPaymentPercentage / 100) * ((1 - Math.pow(1 + monthlyInterestRate, -loanTermMonths)) / monthlyInterestRate);
-				fixedPresentValue = Math.min(fixedPresentValue, 6000000);
+  }
 
-				let insuranceValue = (fixedPresentValue / 1000) * 0.2250427;
-				let monthlyAmortizationValue = (105552 * (monthlyPaymentPercentage / 100)) + insuranceValue;
+  function formatCurrency(value) {
+    return value.toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'PHP',
+      currencyDisplay: 'symbol'
+    });
+  }
 
-				result.textContent = Math.round(fixedPresentValue.toFixed(2)).toLocaleString('en-US', {
-					style: 'currency',
-					currency: 'PHP',
-					currencyDisplay: 'symbol'
-				});
+  function handleComputeModeChange() {
+    const val = affordabilityComputeMode.value;
+    let newLabel = '';
+    let newTextResult = '';
 
-				principalAndInterest.textContent = (105552 * (monthlyPaymentPercentage / 100)).toFixed(2).toLocaleString('en-US', {
-					style: 'currency',
-					currency: 'PHP',
-					currencyDisplay: 'symbol'
-				});
+    switch (val) {
+      case '1':
+        newLabel = 'Desired Loan Amount:';
+        newTextResult = 'The income required for your desired loan amount is approximately:';
+        break;
+      case '2':
+        newLabel = 'Gross Monthly Income:';
+        newTextResult = 'Based on your Gross Monthly Income, you can approximately loan:';
+        break;
+      case '3':
+        newLabel = 'Estimated Value of Property:';
+        newTextResult = 'Based on the appraised value of the property, you can approximately loan:';
+        break;
+      default:
+        newLabel = 'Enter Amount:';
+        break;
+    }
 
-				insurance.textContent = insuranceValue.toFixed(2).toLocaleString('en-US', {
-					style: 'currency',
-					currency: 'PHP',
-					currencyDisplay: 'symbol'
-				});
+    updateLabels(newLabel, newTextResult);
+  }
 
-				monthlyAmortization.textContent = monthlyAmortizationValue.toFixed(2).toLocaleString('en-US', {
-					style: 'currency',
-					currency: 'PHP',
-					currencyDisplay: 'symbol'
-				});
+  function handleCalculateButtonClick() {
+    const valMode = affordabilityComputeMode.value;
+    const pricePeriod = parseFloat(affordabilityPricePeriod.value);
+    const loanTermYears = parseInt(affordabilityRepPeriod.value);
+    const loanDesired = parseFloat(userInput.value);
 
-			} 
-            if(userInput.value < 105552  && pricePeriod != 5.75) {
-				let presentValue = userInput.value * (monthlyPaymentPercentage / 100) * ((1 - Math.pow(1 + monthlyInterestRate, -loanTermMonths)) / monthlyInterestRate);
-				presentValue = Math.min(presentValue, 6000000);
+    hiddenDivComputation.classList.remove('hide');
 
-				let insuranceValue = (presentValue / 1000) * 0.2250427;
-				let monthlyAmortizationValue = (userInput.value * (monthlyPaymentPercentage / 100)) + insuranceValue;
+    if (userInput.value === '') {
+      showAlert('Please enter an amount.');
+      return;
+    }
 
-				result.textContent = Math.round(presentValue.toFixed(2)).toLocaleString('en-US', {
-					style: 'currency',
-					currency: 'PHP',
-					currencyDisplay: 'symbol'
-				});
+    if (loanDesired < 5000) {
+      showAlert('Minimum amount must be 5000.');
+      return;
+    }
 
-				principalAndInterest.textContent = (userInput.value * (monthlyPaymentPercentage / 100)).toFixed(2).toLocaleString('en-US', {
-					style: 'currency',
-					currency: 'PHP',
-					currencyDisplay: 'symbol'
-				});
+    if (loanDesired > 6000000) {
+      showAlert('Please enter an amount lower than 6,000,000.');
+      return;
+    }
 
-				insurance.textContent = insuranceValue.toFixed(2).toLocaleString('en-US', {
-					style: 'currency',
-					currency: 'PHP',
-					currencyDisplay: 'symbol'
-				});
+    if (affordabilityComputeMode.value.trim() === '') {
+      showAlert('Please select what you want to compute.');
+      return;
+    }
 
-				monthlyAmortization.textContent = monthlyAmortizationValue.toFixed(2).toLocaleString('en-US', {
-					style: 'currency',
-					currency: 'PHP',
-					currencyDisplay: 'symbol'
-				});
-			}
+    if (affordabilityRepPeriod.value.trim() === '') {
+      showAlert('Please select preferred pricing period.');
+      return;
+    }
 
-            if(userInput.value >= 116715.5615 && pricePeriod == 5.75){
-            
-                let presentValue = 116715.5615 * (monthlyPaymentPercentage / 100) * ((1 - Math.pow(1 + monthlyInterestRate, -loanTermMonths)) / monthlyInterestRate);
-				presentValue = Math.min(presentValue, 6000000);
+    if (valMode === '1') {
+      const interestRate = (pricePeriod / 100) / 12;
+      const loanTermMonths = 12 * loanTermYears;
+      const debtToIncomeRatio = (pricePeriod === 5.75) ? 0.30 : 0.35;
+      const requiredIncome = loanDesired / ((((1 + interestRate) ** loanTermMonths) - 1) / (interestRate * (1 + interestRate) ** loanTermMonths)) / debtToIncomeRatio;
+      const principalAndInterestValue = requiredIncome * debtToIncomeRatio;
+      const insuranceValue = loanDesired * 0.0002250427;
+      const monthlyAmortizationValue = calculateMonthlyAmortization(loanDesired, interestRate, loanTermMonths);
 
-				let insuranceValue = (presentValue / 1000) * 0.2250427;
-				let monthlyAmortizationValue = (116715.5615 * (monthlyPaymentPercentage / 100)) + insuranceValue;
+      displayValues(requiredIncome, principalAndInterestValue, insuranceValue, monthlyAmortizationValue);
 
-				result.textContent = Math.round(presentValue.toFixed(2)).toLocaleString('en-US', {
-					style: 'currency',
-					currency: 'PHP',
-					currencyDisplay: 'symbol'
-				});
+      hiddenDivComputation.classList.remove('hide');
+      propVal.classList.add('hide');
+      propVal2.classList.add('hide');
+    } else if (valMode === '2') {
+      // Handle valMode 2 calculations
+      const annualInterestRate = parseFloat(affordabilityPricePeriod.value);
+      const monthlyInterestRate = (annualInterestRate / 100) / 12;
+      const loanTermMonths = loanTermYears * 12;
+      const monthlyPaymentPercentage = (pricePeriod === 5.75) ? 30 : 35; // 35%
 
-				principalAndInterest.textContent = (116715.5615 * (monthlyPaymentPercentage / 100)).toFixed(2).toLocaleString('en-US', {
-					style: 'currency',
-					currency: 'PHP',
-					currencyDisplay: 'symbol'
-				});
+      let fixedPresentValue = userInput.value * (monthlyPaymentPercentage / 100) * ((1 - Math.pow(1 + monthlyInterestRate, -loanTermMonths)) / monthlyInterestRate);
+      // fixedPresentValue = Math.min(fixedPresentValue, 6000000);
 
-				insurance.textContent = insuranceValue.toFixed(2).toLocaleString('en-US', {
-					style: 'currency',
-					currency: 'PHP',
-					currencyDisplay: 'symbol'
-				});
+      let insuranceValue = (fixedPresentValue / 1000) * 0.2250427;
+      let monthlyAmortizationValue = (userInput.value * (monthlyPaymentPercentage / 100)) + insuranceValue;
+ 
+      if (fixedPresentValue >= 6000000) {
+        // Perform the additional calculation only when fixedPresentValue is >= 6,000,000
+        const calcResult = calculateAffordability(annualInterestRate, loanTermYears);
+        // const newInsuranceValue = (fixedPresentValue / 1000) * 0.2250427;
+        // console.log("this is result >= 6M: ", result);
+        // let insuranceValue2 = (calcResult.presentValue / 1000) * 0.2250427;
+        // let monthlyAmortizationValue = (calcResult.presentValue * (monthlyPaymentPercentage / 100)) + insuranceValue;
 
-				monthlyAmortization.textContent = monthlyAmortizationValue.toFixed(2).toLocaleString('en-US', {
-					style: 'currency',
-					currency: 'PHP',
-					currencyDisplay: 'symbol'
-                });
-            }
-            else{
-                console.log('test',monthlyPaymentPercentage);
-            let presentValue = userInput.value * (monthlyPaymentPercentage / 100) * ((1 - Math.pow(1 + monthlyInterestRate, -loanTermMonths)) / monthlyInterestRate);
-            presentValue = Math.min(presentValue, 6000000);
-
-            let insuranceValue = (presentValue / 1000) * 0.2250427;
-            let monthlyAmortizationValue = (userInput.value * (monthlyPaymentPercentage / 100)) + insuranceValue;
-
-            result.textContent = Math.round(presentValue.toFixed(2)).toLocaleString('en-US', {
-                style: 'currency',
-                currency: 'PHP',
-                currencyDisplay: 'symbol'
-            });
-
-            principalAndInterest.textContent = (userInput.value * (monthlyPaymentPercentage / 100)).toFixed(2).toLocaleString('en-US', {
-                style: 'currency',
-                currency: 'PHP',
-                currencyDisplay: 'symbol'
-            });
-
-            insurance.textContent = insuranceValue.toFixed(2).toLocaleString('en-US', {
-                style: 'currency',
-                currency: 'PHP',
-                currencyDisplay: 'symbol'
-            });
-
-            monthlyAmortization.textContent = monthlyAmortizationValue.toFixed(2).toLocaleString('en-US', {
-                style: 'currency',
-                currency: 'PHP',
-                currencyDisplay: 'symbol'
-            });
-
-        }
-
-      
-			hiddenDivComputation.classList.remove('hide');
-			propVal.classList.add('hide');
-			propVal2.classList.add('hide');
         
+   
+        let principalAndInterest = (calcResult.presentValue * (monthlyPaymentPercentage / 100))
 
-		} if (valMode === '3') {
-			// Handle valMode 3 calculations
-			let valueOfProperty = parseFloat(userInput.value);
-			let estVal, estimatedEquity, insuranceValue, principalAndInterestValue, grossMonthly;
+        let insuranceValue2 = (calcResult.fixedPresentValue / 1000) * 0.2250427;
+        let monthlyAmortization = principalAndInterest + insuranceValue2;
+ 
+        displayValues(calcResult.fixedPresentValue, principalAndInterest ,insuranceValue2, monthlyAmortization);
+      } else {
+        // Update the UI with the values based on fixedPresentValue
+        displayValues(fixedPresentValue, (userInput.value * (monthlyPaymentPercentage / 100)), insuranceValue, monthlyAmortizationValue);
+      }
 
+      hiddenDivComputation.classList.remove('hide');
+      propVal.classList.add('hide');
+      propVal2.classList.add('hide');
+    } else if (valMode === '3') {
+      // Handle valMode 3 calculations
+      const valueOfProperty = parseFloat(userInput.value);
+      let estVal, estimatedEquity, insuranceValue, principalAndInterestValue, grossMonthly;
 
-			if (valueOfProperty <= 2000000) {
-				estVal = valueOfProperty * 0.95;
-				estimatedEquity = valueOfProperty * 0.05;
+      if (valueOfProperty <= 2000000) {
+        estVal = valueOfProperty * 0.95;
+        estimatedEquity = valueOfProperty * 0.05;
+      } else {
+        estVal = valueOfProperty * 0.9;
+        estimatedEquity = valueOfProperty * 0.1;
+      }
 
-				insuranceValue = estVal * 0.0002250427;
+      insuranceValue = estVal * 0.0002250427;
+      const interestRate = (pricePeriod / 100) / 12;
+      const loanTermMonths = loanTermYears * 12;
+      const principalAndInterestFactor = Math.pow(1 + interestRate, loanTermMonths) - 1;
+      const denominator = interestRate * Math.pow(1 + interestRate, loanTermMonths);
+      const allowableAmort = (pricePeriod === 5.75) ? 0.30 : 0.35; // 35%
 
-				let interestRate = (pricePeriod / 100) / 12;
-				let loanTermMonths = loanTermYears * 12;
-				let principalAndInterestFactor = Math.pow(1 + interestRate, loanTermMonths) - 1;
-				let denominator = interestRate * Math.pow(1 + interestRate, loanTermMonths);
-				let allowableAmort = (pricePeriod === 5.75) ? .30 : .35; // 35%
+      grossMonthly = estVal / (principalAndInterestFactor / denominator) / allowableAmort;
+      principalAndInterestValue = grossMonthly * allowableAmort;
 
-				grossMonthly = estVal / (principalAndInterestFactor / denominator) / allowableAmort;
-				principalAndInterestValue = grossMonthly * allowableAmort;
-			} else {
-				estVal = valueOfProperty * 0.9;
-				estimatedEquity = valueOfProperty * 0.1;
+      result.textContent = formatCurrency(estVal - 0.10);
+      principalAndInterest.textContent = formatCurrency(principalAndInterestValue);
+      insurance.textContent = insuranceValue ? formatCurrency(insuranceValue) : '';
+      monthlyAmortization.textContent = grossMonthly ? formatCurrency(grossMonthly) : '';
+      estEquity.textContent = formatCurrency(estimatedEquity);
+      gmi.textContent = formatCurrency(grossMonthly);
 
-				insuranceValue = estVal * 0.0002250427;
+      propVal.classList.remove('hide');
+      propVal2.classList.remove('hide');
+    }
+  }
 
-				let interestRate = (pricePeriod / 100) / 12;
-				let loanTermMonths = loanTermYears * 12;
-				let principalAndInterestFactor = Math.pow(1 + interestRate, loanTermMonths) - 1;
-				let denominator = interestRate * Math.pow(1 + interestRate, loanTermMonths);
-				let allowableAmort = (pricePeriod === 5.75) ? .30 : .35; // 35%
-
-				grossMonthly = estVal / (principalAndInterestFactor / denominator) / allowableAmort;
-				principalAndInterestValue = grossMonthly * allowableAmort;
-
-			}
-
-			result.textContent = Math.round((estVal - 0.10).toFixed(2)).toLocaleString('en-US', {
-				style: 'currency',
-				currency: 'PHP',
-				currencyDisplay: 'symbol'
-			});
-
-			principalAndInterest.textContent = principalAndInterestValue.toFixed(2).toLocaleString('en-US', {
-				style: 'currency',
-				currency: 'PHP',
-				currencyDisplay: 'symbol'
-			});
-
-			insurance.textContent = insuranceValue ? insuranceValue.toFixed(2).toLocaleString('en-US', {
-				style: 'currency',
-				currency: 'PHP',
-				currencyDisplay: 'symbol'
-			}) : '';
-
-			monthlyAmortization.textContent = grossMonthly ? grossMonthly.toFixed(2).toLocaleString('en-US', {
-				style: 'currency',
-				currency: 'PHP',
-				currencyDisplay: 'symbol'
-			}) : '';
-
-			estEquity.textContent = estimatedEquity.toFixed(2).toLocaleString('en-US', {
-				style: 'currency',
-				currency: 'PHP',
-				currencyDisplay: 'symbol'
-			});
-
-			gmi.textContent = grossMonthly.toFixed(2).toLocaleString('en-US', {
-				style: 'currency',
-				currency: 'PHP',
-				currencyDisplay: 'symbol'
-			});
-
-			propVal.classList.remove('hide');
-			propVal2.classList.remove('hide');
-		}
-	});
+  affordabilityComputeMode.addEventListener('change', handleComputeModeChange);
+  calculateAffordabilityBtn.addEventListener('click', handleCalculateButtonClick);
 });
