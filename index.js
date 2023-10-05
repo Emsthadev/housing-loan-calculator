@@ -15,6 +15,25 @@ document.addEventListener('DOMContentLoaded', function() {
   const estEquity = document.querySelector('.est_equity');
   const gmi = document.querySelector('.gmi');
 
+
+
+
+  // Function to clear values inside hidden_div_computation
+function clearComputationValues() {
+  let resultElements = document.querySelectorAll('.result, .principal_and_interest, .insurance, .monthly_amortization, .est_equity, .gmi');
+  resultElements.forEach(function (element) {
+      element.textContent = '';
+  });
+}
+
+affordabilityComputeMode.addEventListener('change', clearComputationValues);
+affordabilityPricePeriod.addEventListener('change', clearComputationValues);
+affordabilityRepPeriod.addEventListener('change', clearComputationValues);
+
+// Listen for keyup event on #user_input
+userInput.addEventListener('keyup', clearComputationValues);
+
+
   function updateLabels(newLabel, newTextResult) {
     resultLabel.closest('.form-group').querySelector('.result_label').textContent = newTextResult;
     userInput.closest('.form-group').querySelector('label[for="inp"]').textContent = newLabel;
@@ -228,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
       grossMonthly = estVal / (principalAndInterestFactor / denominator) / allowableAmort;
       principalAndInterestValue = grossMonthly * allowableAmort;
 
-      result.textContent = formatCurrency(estVal - 0.10);
+      result.textContent = formatCurrency(Math.round(estVal - 0.10));
       principalAndInterest.textContent = formatCurrency(principalAndInterestValue);
       insurance.textContent = insuranceValue ? formatCurrency(insuranceValue) : '';
       monthlyAmortization.textContent = grossMonthly ? formatCurrency(grossMonthly) : '';

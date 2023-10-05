@@ -19,7 +19,7 @@
                     <label for="affordability_compute_mode">What do you want to compute?</label>
                     <div>
                         <select class="form-control" id="affordability_compute_mode">
-                            <option value="">Select what you want to compute?</option>
+                            <option value="" disabled selected hidden>Select what you want to compute?</option>
                             <option value="1">How much income is required for your desired loan value?</option>
                             <option value="2">How much you can loan based on income</option>
                             <option value="3">How much you can borrow based on the value of the property?</option>
@@ -33,7 +33,7 @@
                     <label for="affordability_price_period">Preferred Fixed Pricing Period:</label>
                     <div>
                         <select class="form-control" id="affordability_price_period">
-                            <option value="">Select pricing period</option>
+                            <option value="" disabled selected hidden>Select pricing period</option>
                             <option value="5.75">1 Year 5.75%</option>
                             <option value="6.25">3 Years 6.25%</option>
                             <option value="6.50">5 Years 6.50%</option>
@@ -54,7 +54,7 @@
                     <label for="affordability_rep_period">Preferred Repayment Period:</label>
                     <div>
                         <select class="form-control" id="affordability_rep_period">
-                            <option value="" disabled selected>Loan Tenure (Monthly)</option>
+                            <option value="" disabled selected hidden>Loan Tenure (Monthly)</option>
                             <option value="30">30 Years</option>
                             <option value="29">29 Years</option>
                             <option value="28">28 Years</option>
@@ -94,7 +94,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="inp">Enter Amount:</label>
-                    <input type="number" name="inp" class="form-control" id="user_input" />
+                    <input type="number" name="inp" class="form-control" id="user_input"  placeholder="0.00" />
                 </div>
             </div>
         </div>
